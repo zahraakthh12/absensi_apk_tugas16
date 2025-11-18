@@ -1,124 +1,139 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'package:absensi_apk_tugas16/models/attendance_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:absensi_apk_tugas16/models/user_model.dart';
 import 'package:absensi_apk_tugas16/preferences/preference_handler.dart';
 
 class AbsensiAPI {
-  static const baseUrl = "https://absensib1.mobileprojp.com/api";
+  static const String baseUrl = "https://appabsensi.mobileprojp.com/api";
 
-  static Future<Map<String, dynamic>> _post(
-      String endpoint, Map<String, dynamic> body) async {
+  // HEADER TOKEN
+  static Future<Map<String, String>> _headers() async {
     final token = await PreferenceHandler.getToken();
-    final response = await http.post(
-      Uri.parse("$baseUrl$endpoint"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json"
-      },
+    return {
+      "Authorization": "Bearer $token",
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    };
+  }
+
+  // GET
+  static Future<dynamic> _get(String endpoint) async {
+    final headers = await _headers();
+    final url = "$baseUrl$endpoint";
+
+    final res = await http.get(Uri.parse(url), headers: headers);
+
+    log("GET → $url");
+    log("STATUS → ${res.statusCode}");
+
+    if (res.statusCode == 200) {
+      return jsonDecode(res.body);
+    } else {
+      throw Exception(jsonDecode(res.body)["message"]);
+    }
+  }
+
+  // POST
+  static Future<dynamic> _post(
+    String endpoint,
+    Map<String, dynamic> body,
+  ) async {
+    final headers = await _headers();
+    final url = "$baseUrl$endpoint";
+
+    final res = await http.post(
+      Uri.parse(url),
+      headers: headers,
       body: jsonEncode(body),
     );
 
-    return jsonDecode(response.body);
+    log("POST → $url");
+    log("DATA → $body");
+    log("STATUS → ${res.statusCode}");
+    log("BODY → ${res.body}");
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return jsonDecode(res.body);
+    } else {
+      throw Exception(jsonDecode(res.body)["message"]);
+    }
   }
 
-  static Future<Map<String, dynamic>> _put(
-      String endpoint, Map<String, dynamic> body) async {
+  // STATISTIK
+  static Future<dynamic> getStat() {
+    return _get('/absen/stats');
+  }
+
+  // PROFILE
+  static Future<GetUserModel> getProfile() async {
     final token = await PreferenceHandler.getToken();
-    final response = await http.put(
-      Uri.parse("$baseUrl$endpoint"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json"
-      },
-      body: jsonEncode(body),
+
+    final res = await http.get(
+      Uri.parse("$baseUrl/profile"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
     );
-    return jsonDecode(response.body);
+
+    if (res.statusCode == 200) {
+      return GetUserModel.fromJson(jsonDecode(res.body));
+    } else {
+      throw Exception(jsonDecode(res.body)["message"]);
+    }
   }
 
-  static Future<Map<String, dynamic>> _get(String endpoint) async {
-    final token = await PreferenceHandler.getToken();
-    final response = await http.get(
-      Uri.parse("$baseUrl$endpoint"),
-      headers: {"Authorization": "Bearer $token"},
-    );
-    return jsonDecode(response.body);
-  }
-
-  static Future<Map<String, dynamic>> _delete(String endpoint) async {
-    final token = await PreferenceHandler.getToken();
-    final response = await http.delete(
-      Uri.parse("$baseUrl$endpoint"),
-      headers: {"Authorization": "Bearer $token"},
-    );
-    return jsonDecode(response.body);
-  }
-
-  // ABSENSI
-
-  static Future<dynamic> checkIn({
+  // CHECK IN
+  static Future<DataAttend> checkIn({
     required String attendanceDate,
     required String time,
     required double lat,
     required double lng,
     required String address,
-  }) {
-    return _post("/absen-check-in", {
+  }) async {
+    final res = await _post("/absen/check-in", {
       "attendance_date": attendanceDate,
       "check_in": time,
       "check_in_lat": lat,
       "check_in_lng": lng,
       "check_in_address": address,
-      "status": "masuk"
     });
+
+    return DataAttend.fromJson(res["data"]);
   }
 
-  static Future<dynamic> checkOut({
+  // CHECK OUT
+  static Future<DataAttend> checkOut({
     required String attendanceDate,
     required String time,
     required double lat,
     required double lng,
     required String address,
-  }) {
-    return _post("/absen-check-out", {
+  }) async {
+    final res = await _post("/absen/check-out", {
       "attendance_date": attendanceDate,
       "check_out": time,
       "check_out_lat": lat,
       "check_out_lng": lng,
       "check_out_address": address,
-      "check_out_location": "$lat,$lng"
+      "check_out_location": "$lat,$lng",
     });
+
+    return DataAttend.fromJson(res["data"]);
   }
 
-  static Future<dynamic> izin({
-    required String date,
-    required String alasan,
-  }) {
-    return _post("/absen-izin", {
-      "date": date,
-      "alasan_izin": alasan,
-    });
+  // HISTORY
+  static Future<List<DataAttend>> getHistory() async {
+    final data = await _get("/absen/history");
+    final List list = data["data"] ?? [];
+
+    return list.map((e) => DataAttend.fromJson(e)).toList();
   }
 
-  static Future<dynamic> getHistory() {
-    return _get("/history-absen");
-  }
-
-  static Future<dynamic> deleteAbsen(int id) {
-    return _delete("/delete-absen?id=$id");
-  }
-
-  // PROFILE
-
-  static Future<dynamic> getProfile() {
-    return _get("/profile");
-  }
-
+  // EDIT PROFILE
   static Future<dynamic> editProfile({
     required String name,
     required String email,
-  }) {
-    return _put("/edit-profile", {
-      "name": name,
-      "email": email,
-    });
+  }) async {
+    return _post("/edit-profile", {"name": name, "email": email});
   }
 }

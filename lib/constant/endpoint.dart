@@ -1,8 +1,12 @@
 class Endpoint {
-  static const baseUrl = 'https://appabsensi.mobileprojp.com'; // SESUAIKAN
+  static const baseUrl = 'https://appabsensi.mobileprojp.com/api';
 
-  static const register = '$baseUrl/api/register';
-  static const login = '$baseUrl/api/login';
-  static const trainings = '$baseUrl/api/trainings'; // SESUAIKAN DENGAN BACKEND
-  static const trainingBatches = '$baseUrl/api/batches'; // SESUAIKAN DENGAN BACKEND
+  static const register = '$baseUrl/register';
+  static const login = '$baseUrl/login';
+  static const trainings = '$baseUrl/trainings';
+  static const trainingBatches = '$baseUrl/batches';
+  static const profile = '$baseUrl/profile';
+  static const histroyAttend = '$baseUrl/absen/history';
+  static const checkIn = '$baseUrl/absen/check-in';
+  static const checkOut = '$baseUrl/absen/check-out';
 }

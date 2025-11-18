@@ -35,28 +35,22 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
   bool passFocus = false;
   bool nameFocus = false;
 
-  // Fokus animasi Dropdown
-  bool isGenderFocused = false;
-  bool isTrainingFocused = false;
-  bool isBatchFocused = false;
-
   RegisterModel user = RegisterModel();
   final _formKey = GlobalKey<FormState>();
 
+  // Gender (L / P)
   String? selectedGender;
+
+  // Training & Batch
   int? selectedTrainingId;
   int? selectedBatchId;
 
   List<TrainingModelData> trainings = [];
   List<BatchModelData> batches = [];
 
+  // Foto Profil
   File? _pickedImageFile;
   String? _profilePhotoBase64;
-
-  final List<Map<String, String>> genderOptions = const [
-    {"label": "Laki-laki", "value": "L"},
-    {"label": "Perempuan", "value": "P"},
-  ];
 
   @override
   void initState() {
@@ -64,6 +58,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     _loadDropdownData();
   }
 
+  // PICK IMAGE
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     try {
@@ -75,7 +70,6 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
       if (picked == null) return;
 
       final bytes = await picked.readAsBytes();
-
       final ext = picked.path.split('.').last.toLowerCase();
       String mime = (ext == 'png') ? "png" : "jpeg";
 
@@ -91,6 +85,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     }
   }
 
+  // LOAD TRAINING & BATCH
   Future<void> _loadDropdownData() async {
     setState(() => isLoadingDropdown = true);
 
@@ -109,14 +104,16 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     setState(() => isLoadingDropdown = false);
   }
 
-  /// REGISTER BUTTON
+  // REGISTER USER
   Future<void> _onRegisterPressed() async {
     if (!_formKey.currentState!.validate()) return;
 
     if (selectedGender == null ||
         selectedTrainingId == null ||
         selectedBatchId == null) {
-      Fluttertoast.showToast(msg: "Semua field wajib diisi.");
+      Fluttertoast.showToast(
+        msg: "Jenis kelamin, program pelatihan, dan batch wajib dipilih.",
+      );
       return;
     }
 
@@ -154,16 +151,12 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     return Scaffold(body: Stack(children: [buildBackground(), buildLayer()]));
   }
 
-  // GRADIENT BIRU PASTEL
+  // BACKGROUND GRADIENT
   Container buildBackground() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFFB5D8FF),
-            const Color(0xFFDCEFFF),
-            Colors.white,
-          ],
+          colors: [Color(0xFFB5D8FF), Color(0xFFDCEFFF), Colors.white],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -194,7 +187,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
 
             const SizedBox(height: 30),
 
-            // CARD UI
+            //== CARD PUTIH==
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
               decoration: BoxDecoration(
@@ -294,7 +287,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
 
                     const SizedBox(height: 18),
 
-                    // NAME
+                    // NAMA
                     buildTitle("Nama Lengkap"),
                     const SizedBox(height: 10),
                     animatedTextField(
@@ -308,154 +301,172 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
                           : null,
                     ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
 
-                    // GENDER DROPDOWN
+                    // JENIS KELAMIN
                     buildTitle("Jenis Kelamin"),
                     const SizedBox(height: 10),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      decoration: dropdownAnimatedDecoration(isGenderFocused),
-                      child: DropdownButtonFormField<String>(
-                        value: selectedGender,
-                        isExpanded: true,
-                        decoration: dropdownNoBorder(),
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: Colors.blue.shade700,
-                          size: 26,
-                        ),
-                        items: genderOptions
-                            .map(
-                              (g) => DropdownMenuItem(
-                                value: g["value"],
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.person_outline,
-                                      color: Colors.blue.shade700,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(g["label"]!),
-                                  ],
+                    Row(
+                      children: [
+                        // LAKI-LAKI
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() => selectedGender = "L");
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                gradient: LinearGradient(
+                                  colors: selectedGender == "L"
+                                      ? [
+                                          Colors.blue.shade300,
+                                          Colors.blue.shade100,
+                                        ]
+                                      : [
+                                          Colors.blue.shade50,
+                                          Colors.blue.shade50,
+                                        ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: selectedGender == "L"
+                                        ? Colors.blue.shade200.withOpacity(0.6)
+                                        : Colors.transparent,
+                                    blurRadius: 12,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: selectedGender == "L"
+                                      ? Colors.blue.shade600
+                                      : Colors.blue.shade100,
+                                  width: 2,
                                 ),
                               ),
-                            )
-                            .toList(),
-                        onTap: () => setState(() => isGenderFocused = true),
-                        onChanged: (v) {
-                          setState(() {
-                            selectedGender = v;
-                            isGenderFocused = false;
-                          });
-                        },
-                        validator: (v) =>
-                            v == null ? "Pilih jenis kelamin" : null,
-                      ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.male_rounded,
+                                    size: 38,
+                                    color: selectedGender == "L"
+                                        ? Colors.white
+                                        : Colors.blue.shade600,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "Laki-laki",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: selectedGender == "L"
+                                          ? Colors.white
+                                          : Colors.blue.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // PEREMPUAN
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() => selectedGender = "P");
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              margin: const EdgeInsets.only(left: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                gradient: LinearGradient(
+                                  colors: selectedGender == "P"
+                                      ? [
+                                          Colors.pink.shade300,
+                                          Colors.pink.shade100,
+                                        ]
+                                      : [
+                                          Colors.blue.shade50,
+                                          Colors.blue.shade50,
+                                        ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: selectedGender == "P"
+                                        ? Colors.pink.shade200.withOpacity(0.6)
+                                        : Colors.transparent,
+                                    blurRadius: 12,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: selectedGender == "P"
+                                      ? Colors.pink.shade600
+                                      : Colors.blue.shade100,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.female_rounded,
+                                    size: 38,
+                                    color: selectedGender == "P"
+                                        ? Colors.white
+                                        : Colors.pink.shade600,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "Perempuan",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: selectedGender == "P"
+                                          ? Colors.white
+                                          : Colors.pink.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 22),
 
-                    // TRAINING DROPDOWN
+                    // PROGRAM PELATIHAN (BOTTOM SHEET)
                     buildTitle("Program Pelatihan"),
                     const SizedBox(height: 10),
                     isLoadingDropdown
                         ? const CircularProgressIndicator()
-                        : AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            decoration: dropdownAnimatedDecoration(
-                              isTrainingFocused,
-                            ),
-                            child: DropdownButtonFormField<int>(
-                              value: selectedTrainingId,
-                              isExpanded: true,
-                              decoration: dropdownNoBorder(),
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: Colors.blue.shade700,
-                                size: 26,
-                              ),
-                              items: trainings
-                                  .map(
-                                    (t) => DropdownMenuItem(
-                                      value: t.id,
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.school_outlined,
-                                            color: Colors.blue.shade700,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(t.title ?? ""),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              onTap: () =>
-                                  setState(() => isTrainingFocused = true),
-                              onChanged: (v) {
-                                setState(() {
-                                  selectedTrainingId = v;
-                                  isTrainingFocused = false;
-                                });
-                              },
-                              validator: (v) =>
-                                  v == null ? "Pilih program pelatihan" : null,
+                        : GestureDetector(
+                            onTap: selectTraining,
+                            child: buildSelectBox(
+                              label: _getTrainingLabel(),
+                              icon: Icons.school_outlined,
                             ),
                           ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
 
-                    // BATCH DROPDOWN
+                    // BATCH (BOTTOM SHEET)
                     buildTitle("Batch Pelatihan"),
                     const SizedBox(height: 10),
                     isLoadingDropdown
                         ? const CircularProgressIndicator()
-                        : AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            decoration: dropdownAnimatedDecoration(
-                              isBatchFocused,
-                            ),
-                            child: DropdownButtonFormField<int>(
-                              value: selectedBatchId,
-                              isExpanded: true,
-                              decoration: dropdownNoBorder(),
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: Colors.blue.shade700,
-                                size: 26,
-                              ),
-                              items: batches
-                                  .map(
-                                    (b) => DropdownMenuItem(
-                                      value: b.id,
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.date_range_outlined,
-                                            color: Colors.blue.shade700,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text("Batch ${b.batchKe}"),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              onTap: () =>
-                                  setState(() => isBatchFocused = true),
-                              onChanged: (v) {
-                                setState(() {
-                                  selectedBatchId = v;
-                                  isBatchFocused = false;
-                                });
-                              },
-                              validator: (v) =>
-                                  v == null ? "Pilih batch pelatihan" : null,
+                        : GestureDetector(
+                            onTap: selectBatch,
+                            child: buildSelectBox(
+                              label: _getBatchLabel(),
+                              icon: Icons.date_range_outlined,
                             ),
                           ),
 
@@ -474,7 +485,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
 
             const SizedBox(height: 20),
 
-            // SIGN IN LINK
+            // SIGN IN
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -497,7 +508,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     );
   }
 
-  // Judul Field
+  // TITLE FIELD
   Widget buildTitle(String title) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -512,13 +523,13 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     );
   }
 
-  // Textfield animasi dan icon
+  // TEXTFIELD ANIMASI
   Widget animatedTextField({
     required TextEditingController controller,
     required String hint,
     required bool focus,
     required Function(bool) onFocusChange,
-    IconData? icon,
+    required IconData icon,
     bool isPassword = false,
     String? Function(String?)? validator,
   }) {
@@ -545,9 +556,7 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
             validator: validator,
             obscureText: isPassword ? !isVisibility : false,
             decoration: InputDecoration(
-              prefixIcon: icon != null
-                  ? Icon(icon, color: Colors.blue.shade700)
-                  : null,
+              prefixIcon: Icon(icon, color: Colors.blue.shade700),
               hintText: hint,
               filled: true,
               fillColor: Colors.blue.shade50,
@@ -577,33 +586,222 @@ class _RegisterScreenDay34State extends State<RegisterScreenDay34> {
     );
   }
 
-  // Dropdown Animasi
-  BoxDecoration dropdownAnimatedDecoration(bool isFocused) {
-    return BoxDecoration(
-      borderRadius: BorderRadius.circular(18),
-      gradient: LinearGradient(
-        colors: [
-          isFocused ? Colors.blue.shade200 : Colors.blue.shade50,
-          isFocused ? Colors.blue.shade100 : Colors.blue.shade50,
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+  // SELECT BOX (UNTUK BOTTOM SHEET)
+  Widget buildSelectBox({required String label, required IconData icon}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.blue.shade50,
       ),
-      boxShadow: [
-        BoxShadow(
-          blurRadius: isFocused ? 12 : 4,
-          spreadRadius: isFocused ? 1 : 0,
-          color: Colors.blue.shade200.withOpacity(isFocused ? 0.6 : 0.2),
-          offset: const Offset(0, 3),
-        ),
-      ],
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blue.shade700),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.blue.shade900),
+            ),
+          ),
+          Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 26,
+            color: Colors.blue.shade700,
+          ),
+        ],
+      ),
     );
   }
 
-  InputDecoration dropdownNoBorder() {
-    return const InputDecoration(
-      border: InputBorder.none,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+  // LABEL HELPER
+  String _getTrainingLabel() {
+    if (selectedTrainingId == null) return "Pilih Program Pelatihan";
+    if (trainings.isEmpty) return "Pilih Program Pelatihan";
+
+    final item = trainings.firstWhere(
+      (e) => e.id == selectedTrainingId,
+      orElse: () => trainings.first,
+    );
+    return item.title ?? "Pilih Program Pelatihan";
+  }
+
+  String _getBatchLabel() {
+    if (selectedBatchId == null) return "Pilih Batch Pelatihan";
+    if (batches.isEmpty) return "Pilih Batch Pelatihan";
+
+    final item = batches.firstWhere(
+      (e) => e.id == selectedBatchId,
+      orElse: () => batches.first,
+    );
+    return "Batch ${item.batchKe}";
+  }
+
+  // BOTTOM SHEET TRAINING
+  Future<void> selectTraining() async {
+    if (trainings.isEmpty) {
+      Fluttertoast.showToast(msg: "Data pelatihan belum tersedia");
+      return;
+    }
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          maxChildSize: 0.9,
+          minChildSize: 0.4,
+          builder: (_, controller) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    "Pilih Program Pelatihan",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: controller,
+                      itemCount: trainings.length,
+                      itemBuilder: (_, i) {
+                        final item = trainings[i];
+                        final isSelected = item.id == selectedTrainingId;
+                        return ListTile(
+                          leading: Icon(
+                            Icons.school,
+                            color: Colors.blue.shade700,
+                          ),
+                          title: Text(item.title ?? ""),
+                          trailing: isSelected
+                              ? Icon(
+                                  Icons.check_circle,
+                                  color: Colors.blue.shade600,
+                                )
+                              : null,
+                          onTap: () {
+                            setState(() => selectedTrainingId = item.id);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // BOTTOM SHEET BATCH
+  Future<void> selectBatch() async {
+    if (batches.isEmpty) {
+      Fluttertoast.showToast(msg: "Data batch belum tersedia");
+      return;
+    }
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          maxChildSize: 0.8,
+          minChildSize: 0.4,
+          builder: (_, controller) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    "Pilih Batch Pelatihan",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: controller,
+                      itemCount: batches.length,
+                      itemBuilder: (_, i) {
+                        final item = batches[i];
+                        final isSelected = item.id == selectedBatchId;
+                        return ListTile(
+                          leading: Icon(
+                            Icons.date_range_outlined,
+                            color: Colors.blue.shade700,
+                          ),
+                          title: Text("Batch ${item.batchKe}"),
+                          trailing: isSelected
+                              ? Icon(
+                                  Icons.check_circle,
+                                  color: Colors.blue.shade600,
+                                )
+                              : null,
+                          onTap: () {
+                            setState(() => selectedBatchId = item.id);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

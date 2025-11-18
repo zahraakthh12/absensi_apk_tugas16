@@ -1,5 +1,7 @@
 import 'package:absensi_apk_tugas16/preferences/preference_handler.dart';
 import 'package:absensi_apk_tugas16/service/api.dart';
+import 'package:absensi_apk_tugas16/views/bottom_nav.dart';
+import 'package:absensi_apk_tugas16/views/dashboard_attend.dart';
 import 'package:absensi_apk_tugas16/views/regist_screen.dart';
 import 'package:absensi_apk_tugas16/widgets/login_button.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +108,7 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                         validator: validateEmail,
                       ),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 18),
 
                       buildTitle("Kata Sandi"),
                       const SizedBox(height: 10),
@@ -120,7 +122,7 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                         validator: validatePassword,
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -135,7 +137,7 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                         ),
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 5),
 
                       // LOGIN BUTTON
                       LoginButton(
@@ -148,19 +150,44 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                                 password: passwordController.text,
                               );
 
-                              PreferenceHandler.saveToken(result.data!.token!);
-                              PreferenceHandler.saveLogin(true);
+                              await PreferenceHandler.saveToken(
+                                result.data!.token!,
+                              );
+                              await PreferenceHandler.saveLogin(true);
 
+                              // NOTIFIKASI LOGIN BERHASIL
+                              Fluttertoast.showToast(
+                                msg: "Login Berhasil",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.TOP,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  170,
+                                  201,
+                                  171,
+                                ),
+                                textColor: Colors.white,
+                                fontSize: 16.0,
+                              );
+
+                              // NAVIGASI
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RegisterScreenDay34(),
+                                  builder: (context) => const MainNavigation(),
                                 ),
                               );
                             } catch (e) {
                               Fluttertoast.showToast(
                                 msg: "Email atau password salah",
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  192,
+                                  151,
+                                  150,
+                                ),
+                                textColor: Colors.white,
+                                gravity: ToastGravity.TOP,
                               );
                             }
                           }
@@ -207,12 +234,40 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
     );
   }
 
-  // VALIDATOR
+  // HANDLE LOGIN LOGIC
+  Future<void> handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
 
+    try {
+      final result = await AuthAPI.loginUser(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      // SIMPAN TOKEN
+      await PreferenceHandler.saveToken(result.data!.token!);
+
+      // SIMPAN STATUS LOGIN
+      await PreferenceHandler.saveLogin(true);
+
+      // SIMPAN NAMA USER
+      await PreferenceHandler.saveName(result.data!.user!.name ?? "");
+
+      Fluttertoast.showToast(msg: "Login Berhasil");
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      );
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Email atau password salah");
+    }
+  }
+
+  // VALIDATOR
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) return "Email tidak boleh kosong";
     if (!value.contains('@')) return "Email tidak valid";
-
     if (!RegExp(
       r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
     ).hasMatch(value)) {
@@ -228,7 +283,6 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
   }
 
   // UI REUSABLE
-
   Widget buildTitle(String text) {
     return Align(
       alignment: Alignment.centerLeft,

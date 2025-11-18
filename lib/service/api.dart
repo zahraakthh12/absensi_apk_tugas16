@@ -44,7 +44,7 @@ class AuthAPI {
     }
   }
 
-    static Future<LoginModel> loginUser({
+  static Future<LoginModel> loginUser({
     required String email,
     required String password,
   }) async {

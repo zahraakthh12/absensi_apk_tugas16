@@ -1,22 +1,30 @@
-// lib/constant/preference_handler.dart
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceHandler {
   static const String isLogin = "isLogin";
   static const String isToken = "isToken";
+  static const String isName = "isName";
 
-  // Save data login pada saat login
+  // SAVE DATA
+
   static Future<void> saveLogin(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(isLogin, value);
+    prefs.setBool(isLogin, value);
   }
 
   static Future<void> saveToken(String value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(isToken, value);
+    prefs.setString(isToken, value);
   }
 
-  // Ambil data login pada saat mau login / ke dashboard
+  static Future<void> saveName(String value) async {
+    // <-- tambahkan
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(isName, value);
+  }
+
+  // GET DATA
+
   static Future<bool?> getLogin() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(isLogin);
@@ -27,15 +35,26 @@ class PreferenceHandler {
     return prefs.getString(isToken);
   }
 
-  // Hapus data login pada saat logout
+  static Future<String?> getName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(isName);
+  }
+
+  // REMOVE DATA
+
   static Future<void> removeLogin() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(isLogin);
-    await prefs.remove(isToken); // hapus token juga
+    prefs.remove(isLogin);
   }
 
   static Future<void> removeToken() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(isToken);
+    prefs.remove(isToken);
+  }
+
+  static Future<void> removeName() async {
+    // <-- tambahkan
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(isName);
   }
 }

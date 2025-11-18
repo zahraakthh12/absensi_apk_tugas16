@@ -1,21 +1,21 @@
 // To parse this JSON data, do
 //
-//     final registerModel = registerModelFromJson(jsonString);
+//     final getUserModel = getUserModelFromJson(jsonString);
 
 import 'dart:convert';
 
-RegisterModel registerModelFromJson(String str) =>
-    RegisterModel.fromJson(json.decode(str));
+GetUserModel getUserModelFromJson(String str) =>
+    GetUserModel.fromJson(json.decode(str));
 
-String registerModelToJson(RegisterModel data) => json.encode(data.toJson());
+String getUserModelToJson(GetUserModel data) => json.encode(data.toJson());
 
-class RegisterModel {
+class GetUserModel {
   String? message;
   Data? data;
 
-  RegisterModel({this.message, this.data});
+  GetUserModel({this.message, this.data});
 
-  factory RegisterModel.fromJson(Map<String, dynamic> json) => RegisterModel(
+  factory GetUserModel.fromJson(Map<String, dynamic> json) => GetUserModel(
     message: json["message"],
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
   );
@@ -24,80 +24,56 @@ class RegisterModel {
 }
 
 class Data {
-  String? token;
-  User? user;
-  dynamic profilePhotoUrl;
-
-  Data({this.token, this.user, this.profilePhotoUrl});
-
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-    token: json["token"],
-    user: json["user"] == null ? null : User.fromJson(json["user"]),
-    profilePhotoUrl: json["profile_photo_url"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "token": token,
-    "user": user?.toJson(),
-    "profile_photo_url": profilePhotoUrl,
-  };
-}
-
-class User {
+  int? id;
   String? name;
   String? email;
-  String? batchId;
-  String? trainingId;
-  String? jenisKelamin;
-  dynamic profilePhoto;
-  String? updatedAt;
-  String? createdAt;
-  int? id;
+  String? batchKe;
+  String? trainingTitle;
   Batch? batch;
   Training? training;
+  String? jenisKelamin;
+  dynamic profilePhoto;
+  dynamic profilePhotoUrl;
 
-  User({
+  Data({
+    this.id,
     this.name,
     this.email,
-    this.batchId,
-    this.trainingId,
-    this.jenisKelamin,
-    this.profilePhoto,
-    this.updatedAt,
-    this.createdAt,
-    this.id,
+    this.batchKe,
+    this.trainingTitle,
     this.batch,
     this.training,
+    this.jenisKelamin,
+    this.profilePhoto,
+    this.profilePhotoUrl,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
+  factory Data.fromJson(Map<String, dynamic> json) => Data(
+    id: json["id"],
     name: json["name"],
     email: json["email"],
-    batchId: json["batch_id"],
-    trainingId: json["training_id"],
-    jenisKelamin: json["jenis_kelamin"],
-    profilePhoto: json["profile_photo"],
-    updatedAt: json["updated_at"],
-    createdAt: json["created_at"],
-    id: json["id"],
+    batchKe: json["batch_ke"],
+    trainingTitle: json["training_title"],
     batch: json["batch"] == null ? null : Batch.fromJson(json["batch"]),
     training: json["training"] == null
         ? null
         : Training.fromJson(json["training"]),
+    jenisKelamin: json["jenis_kelamin"],
+    profilePhoto: json["profile_photo"],
+    profilePhotoUrl: json["profile_photo_url"],
   );
 
   Map<String, dynamic> toJson() => {
+    "id": id,
     "name": name,
     "email": email,
-    "batch_id": batchId,
-    "training_id": trainingId,
-    "jenis_kelamin": jenisKelamin,
-    "profile_photo": profilePhoto,
-    "updated_at": updatedAt,
-    "created_at": createdAt,
-    "id": id,
+    "batch_ke": batchKe,
+    "training_title": trainingTitle,
     "batch": batch?.toJson(),
     "training": training?.toJson(),
+    "jenis_kelamin": jenisKelamin,
+    "profile_photo": profilePhoto,
+    "profile_photo_url": profilePhotoUrl,
   };
 }
 
