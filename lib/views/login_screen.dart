@@ -1,4 +1,5 @@
 import 'package:absensi_apk_tugas16/preferences/preference_handler.dart';
+import 'package:absensi_apk_tugas16/service/absensi_api.dart';
 import 'package:absensi_apk_tugas16/service/api.dart';
 import 'package:absensi_apk_tugas16/views/bottom_nav.dart';
 import 'package:absensi_apk_tugas16/views/dashboard_attend.dart';
@@ -252,6 +253,9 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
 
       // SIMPAN NAMA USER
       await PreferenceHandler.saveName(result.data!.user!.name ?? "");
+
+      final profile = await AbsensiAPI.getProfile();
+await PreferenceHandler.savePhoto(profile.data?.profilePhoto ?? "");
 
       Fluttertoast.showToast(msg: "Login Berhasil");
 

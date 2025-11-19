@@ -9,4 +9,9 @@ class Endpoint {
   static const histroyAttend = '$baseUrl/absen/history';
   static const checkIn = '$baseUrl/absen/check-in';
   static const checkOut = '$baseUrl/absen/check-out';
+  static const todayPresence = '$baseUrl/absen/today';
+  static const updateProfilePhoto = '$baseUrl/profile';
+  static const todayAttendance = '$baseUrl/absen/today';
+  static const presenceStats = '$baseUrl/absen/stats';
+  static const deleteAbsen = '$baseUrl/absen';
 }

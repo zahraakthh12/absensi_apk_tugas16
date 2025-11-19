@@ -4,6 +4,7 @@ class PreferenceHandler {
   static const String isLogin = "isLogin";
   static const String isToken = "isToken";
   static const String isName = "isName";
+  static const String isPhoto = "isPhoto";
 
   // SAVE DATA
 
@@ -18,6 +19,12 @@ class PreferenceHandler {
   }
 
   static Future<void> saveName(String value) async {
+    // <-- tambahkan
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(isName, value);
+  }
+
+  static Future<void> savePhoto(String value) async {
     // <-- tambahkan
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(isName, value);
@@ -40,6 +47,11 @@ class PreferenceHandler {
     return prefs.getString(isName);
   }
 
+  static Future<String?> getPhoto() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(isName);
+  }
+
   // REMOVE DATA
 
   static Future<void> removeLogin() async {
@@ -56,5 +68,17 @@ class PreferenceHandler {
     // <-- tambahkan
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(isName);
+  }
+
+    static Future<void> removePhoto() async {
+    // <-- tambahkan
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(isName);
+  }
+
+  // Clear All (Log Out)
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // <-- Hapus seluruh data
   }
 }
