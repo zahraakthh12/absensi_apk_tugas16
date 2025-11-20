@@ -13,15 +13,15 @@ import 'package:absensi_apk_tugas16/models/attendance_model.dart';
 /// =================================================================
 ///   PAGE UTAMA — PILIH ABSENSI (Check In / Check Out)
 //  Soft Pastel UI ✔ Clean ✔ Minimalist ✔ Modern
-/// =================================================================
 class AttendancePage extends StatelessWidget {
   const AttendancePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: const Color(0xFFE9F2FF),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           "Kehadiran",
           style: TextStyle(fontWeight: FontWeight.w700),
@@ -332,9 +332,7 @@ class _AttendanceDetailPageState extends State<AttendanceDetailPage>
         ? const Color.fromARGB(255, 97, 146, 115) // pastel green
         : const Color.fromARGB(255, 173, 129, 129); // pastel red
 
-    final btnSubmitColor = widget.isCheckIn
-        ? const Color.fromARGB(255, 97, 146, 115)
-        : const Color.fromARGB(255, 173, 129, 129);
+    final btnSubmitColor = mainColor;
 
     final hasCheckIn = (todayData?.checkInTime ?? "").isNotEmpty;
     final hasCheckOut = (todayData?.checkOutTime ?? "").isNotEmpty;
@@ -358,270 +356,265 @@ class _AttendanceDetailPageState extends State<AttendanceDetailPage>
 
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : FadeTransition(
-              opacity: _fade,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // ======================= MAPS =======================
-                    SizedBox(
-                      height: 260,
-                      child: position == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : GoogleMap(
-                              initialCameraPosition: CameraPosition(
-                                target: LatLng(
-                                  position!.latitude,
-                                  position!.longitude,
+          : SafeArea(
+              child: FadeTransition(
+                opacity: _fade,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // ====================== GOOGLE MAP ======================
+                      SizedBox(
+                        height: 280,
+                        child: position == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : GoogleMap(
+                                initialCameraPosition: CameraPosition(
+                                  target: LatLng(
+                                    position!.latitude,
+                                    position!.longitude,
+                                  ),
+                                  zoom: 16,
                                 ),
-                                zoom: 16,
+                                myLocationEnabled: true,
+                                zoomControlsEnabled: false,
+                                myLocationButtonEnabled: false,
                               ),
-                              myLocationEnabled: true,
-                              zoomControlsEnabled: false,
-                              myLocationButtonEnabled: false,
-                            ),
-                    ),
-
-                    // ======================= CARD PUTIH BAWAH =======================
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 22,
                       ),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(26),
+
+                      // ================= WHITE CARD =================
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 22,
                         ),
-                      ),
-
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // STATUS
-                          Row(
-                            children: [
-                              const Text(
-                                "Status: ",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                statusText,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: mainColor,
-                                ),
-                              ),
-                            ],
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(26),
                           ),
-
-                          const SizedBox(height: 12),
-
-                          const Text(
-                            "Alamat:",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(address, style: const TextStyle(height: 1.4)),
-
-                          const SizedBox(height: 18),
-
-                          // ======================= CARD WAKTU KEHADIRAN =======================
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFDFEFF),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Colors.grey.shade200),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12.withOpacity(0.04),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // STATUS
+                            Row(
                               children: [
                                 const Text(
-                                  "Waktu Kehadiran",
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black54,
-                                  ),
+                                  "Status: ",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                const SizedBox(height: 14),
-
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Hari & tanggal
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          dayName,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.blue.shade900,
-                                          ),
-                                        ),
-                                        Text(
-                                          dateFormat,
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    // Check In - Check Out
-                                    Row(
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            const Text(
-                                              "Check In",
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                            Text(
-                                              todayData?.checkInTime ??
-                                                  "-- : --",
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-
-                                        const SizedBox(width: 18),
-                                        Container(
-                                          width: 1,
-                                          height: 26,
-                                          color: Colors.grey.shade300,
-                                        ),
-                                        const SizedBox(width: 18),
-
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            const Text(
-                                              "Check Out",
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                            Text(
-                                              todayData?.checkOutTime ??
-                                                  "-- : --",
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: mainColor,
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
 
-                          const SizedBox(height: 24),
+                            const SizedBox(height: 14),
 
-                          // ======================= TOMBOL AMBIL FOTO =======================
-                          GestureDetector(
-                            onTap: _pickImage,
-                            child: Container(
+                            // ADDRESS
+                            const Text(
+                              "Alamat:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(address, style: const TextStyle(height: 1.4)),
+
+                            const SizedBox(height: 20),
+
+                            // ================= CARD TIME =================
+                            Container(
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFAED4FF),
-                                    Color(0xFFCAE8FF),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(30),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(color: Colors.grey.shade200),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12.withOpacity(0.05),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
                               ),
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.camera_alt_outlined,
-                                      color: Colors.blue,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Waktu Kehadiran",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      imageFile == null
-                                          ? "Ambil Foto"
-                                          : "Ulangi Foto",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
+                                  ),
+                                  const SizedBox(height: 14),
+
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Tanggal & Hari
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            dayName,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.blue.shade900,
+                                            ),
+                                          ),
+                                          Text(
+                                            dateFormat,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      // Check IN/OUT
+                                      Row(
+                                        children: [
+                                          Column(
+                                            children: [
+                                              const Text(
+                                                "Check In",
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                              Text(
+                                                todayData?.checkInTime ??
+                                                    "-- : --",
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(width: 25),
+                                          Container(
+                                            width: 1,
+                                            height: 26,
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          const SizedBox(width: 25),
+                                          Column(
+                                            children: [
+                                              const Text(
+                                                "Check Out",
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                              Text(
+                                                todayData?.checkOutTime ??
+                                                    "-- : --",
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 28),
+
+                            // ================= PICK IMAGE =================
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFAED4FF),
+                                      Color(0xFFCAE8FF),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Container(
+                                  margin: const EdgeInsets.all(2),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.camera_alt_outlined,
                                         color: Colors.blue,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        imageFile == null
+                                            ? "Ambil Foto"
+                                            : "Ulangi Foto",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
 
-                          if (imageFile != null) ...[
-                            const SizedBox(height: 10),
-                            Text(
-                              "Foto sudah diambil ✔",
-                              style: TextStyle(color: Colors.green.shade700),
+                            if (imageFile != null) ...[
+                              const SizedBox(height: 10),
+                              Text(
+                                "Foto sudah diambil ✔",
+                                style: TextStyle(color: Colors.green.shade700),
+                              ),
+                            ],
+
+                            const SizedBox(height: 30),
+
+                            // ================= SUBMIT BUTTON =================
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton(
+                                onPressed: _submitAttendance,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: btnSubmitColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                child: Text(
+                                  widget.isCheckIn ? "Check In" : "Check Out",
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
-
-                          const SizedBox(height: 28),
-
-                          // ======================= SUBMIT BUTTON =======================
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: _submitAttendance,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: btnSubmitColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                              ),
-                              child: Text(
-                                widget.isCheckIn ? "Check In" : "Check Out",
-                                style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

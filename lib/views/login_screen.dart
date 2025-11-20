@@ -16,33 +16,60 @@ class LoginScreenDay33 extends StatefulWidget {
   State<LoginScreenDay33> createState() => _LoginScreenDay33State();
 }
 
-class _LoginScreenDay33State extends State<LoginScreenDay33> {
+class _LoginScreenDay33State extends State<LoginScreenDay33>
+    with SingleTickerProviderStateMixin {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool isVisibility = false;
-
-  // Fokus animasi textfield
   bool emailFocus = false;
   bool passFocus = false;
 
   final _formKey = GlobalKey<FormState>();
+
+  // ANIMATION
+  late AnimationController _logoController;
+  late Animation<double> _fadeLogo;
+  late Animation<double> _scaleLogo;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // LOGO ANIMATION — lembut & premium
+    _logoController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+
+    _fadeLogo = CurvedAnimation(parent: _logoController, curve: Curves.easeIn);
+
+    _scaleLogo = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
+    );
+
+    _logoController.forward();
+  }
+
+  @override
+  void dispose() {
+    _logoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: Stack(children: [buildBackground(), buildLayer()]));
   }
 
+  // ===========================================================
   // BACKGROUND GRADIENT BIRU PASTEL
+  // ===========================================================
   Container buildBackground() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFFB5D8FF),
-            const Color(0xFFDCEFFF),
-            Colors.white,
-          ],
+          colors: [Color(0xFFB5D8FF), Color(0xFFDCEFFF), Colors.white],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -50,7 +77,9 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
     );
   }
 
+  // ===========================================================
   // MAIN LAYER LOGIN
+  // ===========================================================
   SafeArea buildLayer() {
     return SafeArea(
       child: Center(
@@ -58,9 +87,24 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
-              // TITLE
+              // ========================== LOGO ==========================
+              FadeTransition(
+                opacity: _fadeLogo,
+                child: ScaleTransition(
+                  scale: _scaleLogo,
+                  child: Image.asset(
+                    "assets/images/sipresensi.png",
+                    width: 120,
+                    height: 120,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // ======================== TITLE =========================
               const Text(
                 "Selamat Datang!",
                 style: TextStyle(
@@ -75,12 +119,12 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 32),
 
-              // CARD LOGIN
+              // ====================== CARD LOGIN ======================
               Container(
                 padding: const EdgeInsets.symmetric(
-                  vertical: 28,
+                  vertical: 26,
                   horizontal: 24,
                 ),
                 decoration: BoxDecoration(
@@ -89,8 +133,8 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.blue.shade100.withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+                      blurRadius: 25,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -138,59 +182,14 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                         ),
                       ),
 
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 8),
 
                       // LOGIN BUTTON
                       LoginButton(
                         text: "Masuk",
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            try {
-                              final result = await AuthAPI.loginUser(
-                                email: emailController.text,
-                                password: passwordController.text,
-                              );
-
-                              await PreferenceHandler.saveToken(
-                                result.data!.token!,
-                              );
-                              await PreferenceHandler.saveLogin(true);
-
-                              // NOTIFIKASI LOGIN BERHASIL
-                              Fluttertoast.showToast(
-                                msg: "Login Berhasil",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.TOP,
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  170,
-                                  201,
-                                  171,
-                                ),
-                                textColor: Colors.white,
-                                fontSize: 16.0,
-                              );
-
-                              // NAVIGASI
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const MainNavigation(),
-                                ),
-                              );
-                            } catch (e) {
-                              Fluttertoast.showToast(
-                                msg: "Email atau password salah",
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  192,
-                                  151,
-                                  150,
-                                ),
-                                textColor: Colors.white,
-                                gravity: ToastGravity.TOP,
-                              );
-                            }
+                            await handleLogin();
                           }
                         },
                       ),
@@ -199,9 +198,9 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 22),
 
-              // REGISTER LINK
+              // ======================== REGISTER LINK ========================
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -235,7 +234,9 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
     );
   }
 
-  // HANDLE LOGIN LOGIC
+  // ===========================================================
+  // LOGIN LOGIC
+  // ===========================================================
   Future<void> handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -245,30 +246,27 @@ class _LoginScreenDay33State extends State<LoginScreenDay33> {
         password: passwordController.text,
       );
 
-      // SIMPAN TOKEN
       await PreferenceHandler.saveToken(result.data!.token!);
-
-      // SIMPAN STATUS LOGIN
       await PreferenceHandler.saveLogin(true);
-
-      // SIMPAN NAMA USER
       await PreferenceHandler.saveName(result.data!.user!.name ?? "");
 
       final profile = await AbsensiAPI.getProfile();
-await PreferenceHandler.savePhoto(profile.data?.profilePhoto ?? "");
+      await PreferenceHandler.savePhoto(profile.data?.profilePhoto ?? "");
 
       Fluttertoast.showToast(msg: "Login Berhasil");
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        MaterialPageRoute(builder: (context) => const MainNavigation()),
       );
     } catch (e) {
       Fluttertoast.showToast(msg: "Email atau password salah");
     }
   }
 
+  // ===========================================================
   // VALIDATOR
+  // ===========================================================
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) return "Email tidak boleh kosong";
     if (!value.contains('@')) return "Email tidak valid";
@@ -286,7 +284,9 @@ await PreferenceHandler.savePhoto(profile.data?.profilePhoto ?? "");
     return null;
   }
 
+  // ===========================================================
   // UI REUSABLE
+  // ===========================================================
   Widget buildTitle(String text) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -308,13 +308,13 @@ await PreferenceHandler.savePhoto(profile.data?.profilePhoto ?? "");
     String? Function(String?)? validator,
   }) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 240),
       padding: EdgeInsets.only(bottom: focus ? 4 : 0),
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
             color: focus
-                ? Colors.blue.shade200.withOpacity(0.6)
+                ? Colors.blue.shade200.withOpacity(0.55)
                 : Colors.transparent,
             blurRadius: 12,
             spreadRadius: 1,
@@ -336,7 +336,7 @@ await PreferenceHandler.savePhoto(profile.data?.profilePhoto ?? "");
               filled: true,
               fillColor: Colors.blue.shade50,
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 14,
+                vertical: 15,
                 horizontal: 18,
               ),
               border: OutlineInputBorder(

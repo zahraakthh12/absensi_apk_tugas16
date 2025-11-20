@@ -1,3 +1,7 @@
+// ===========================================================
+//                  PROFILE SCREEN – MODERN UI
+// ===========================================================
+
 import 'package:absensi_apk_tugas16/views/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -23,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     loadProfile();
   }
 
-  // ===================== LOAD PROFILE =====================
+  // LOAD USER
   Future<void> loadProfile() async {
     try {
       final res = await AbsensiAPI.getProfile();
@@ -34,10 +38,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => loading = false);
   }
 
-  // ===================== LOGOUT =====================
+  // LOGOUT
   Future<void> _logout() async {
     await PreferenceHandler.clearAll();
     if (!mounted) return;
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreenDay33()),
@@ -45,210 +50,169 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
-  // ===================== DIALOG KONFIRMASI =====================
+  // POPUP KONFIRMASI
   Future<bool?> _showConfirmDialog({
     required String title,
     required String message,
-    String okText = "Ya",
-    String cancelText = "Batal",
   }) {
-    return showDialog<bool>(
+    return showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(cancelText, style: const TextStyle(color: Colors.grey)),
+            child: const Text("Batal"),
           ),
           ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade600,
+              backgroundColor: Colors.redAccent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(okText),
+            child: const Text("Ya, Logout"),
           ),
         ],
       ),
     );
   }
 
-  // ===================== POPUP EDIT NAMA =====================
+  // POPUP EDIT PROFIL
   Future<void> _showEditDialog() async {
-    final TextEditingController nameC = TextEditingController(
-      text: user?.name ?? "",
-    );
+    final nameC = TextEditingController(text: user?.name ?? "");
 
     await showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.35), // blur overlay
-      builder: (_) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.88,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+      builder: (_) => Center(
+        child: Material(
+          color: Colors.black.withOpacity(0.25),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.88,
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(26),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Edit Profil",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 18),
+
+                // FIELD NAMA
+                const Text("Nama Lengkap"),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: nameC,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: Colors.blue.shade600,
+                        width: 1.3,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                ),
+
+                const SizedBox(height: 20),
+
+                // READONLY
+                _readonlyField("Email", user?.email ?? "-"),
+                _readonlyField("Jenis Kelamin", user?.jenisKelamin ?? "-"),
+                _readonlyField("Batch Ke", user?.batchKe ?? "-"),
+                _readonlyField("Pelatihan", user?.trainingTitle ?? "-"),
+
+                const SizedBox(height: 26),
+
+                // BUTTON
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // ================= TITLE =================
-                    const Text(
-                      "Edit Profil",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black87,
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        "Batal",
+                        style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (nameC.text.trim().isEmpty) {
+                          Fluttertoast.showToast(
+                            msg: "Nama tidak boleh kosong",
+                          );
+                          return;
+                        }
 
-                    const SizedBox(height: 24),
+                        try {
+                          await AbsensiAPI.editProfile(name: nameC.text.trim());
+                          Fluttertoast.showToast(
+                            msg: "Profil berhasil diperbarui",
+                          );
 
-                    // ================= NAMA =================
-                    const Text(
-                      "Nama Lengkap",
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: nameC,
-                      style: const TextStyle(fontSize: 15),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                          horizontal: 14,
-                        ),
-                        enabledBorder: OutlineInputBorder(
+                          Navigator.pop(context);
+                          loadProfile();
+                        } catch (e) {
+                          Fluttertoast.showToast(msg: "Gagal memperbarui");
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade600,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade500,
-                            width: 1.4,
-                          ),
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // ================= READONLY FIELDS =================
-                    _readonlyField("Email", user?.email ?? "-"),
-                    _readonlyField("Jenis Kelamin", user?.jenisKelamin ?? "-"),
-                    _readonlyField("Batch Ke", user?.batchKe ?? "-"),
-                    _readonlyField("Pelatihan", user?.trainingTitle ?? "-"),
-
-                    const SizedBox(height: 26),
-
-                    // ================= BUTTONS =================
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            "Batal",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
                         ),
-                        const SizedBox(width: 6),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade600,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 28,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () async {
-                            if (nameC.text.trim().isEmpty) {
-                              Fluttertoast.showToast(
-                                msg: "Nama tidak boleh kosong",
-                              );
-                              return;
-                            }
-
-                            try {
-                              await AbsensiAPI.editProfile(
-                                name: nameC.text.trim(),
-                              );
-                              Fluttertoast.showToast(
-                                msg: "Profil berhasil diperbarui",
-                              );
-
-                              Navigator.pop(context);
-                              loadProfile();
-                            } catch (e) {
-                              Fluttertoast.showToast(
-                                msg: "Gagal menyimpan perubahan",
-                              );
-                            }
-                          },
-                          child: const Text(
-                            "Simpan",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                        child: Text(
+                          "Simpan",
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  // ===================== READONLY FIELD =====================
+  // FIELD READONLY
   Widget _readonlyField(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
-
           Container(
-            width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
             decoration: BoxDecoration(
               color: Colors.grey.shade100,
@@ -257,16 +221,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Row(
               children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-
-                Icon(Icons.lock, size: 18, color: Colors.grey.shade500),
+                Expanded(child: Text(value)),
+                Icon(Icons.lock, color: Colors.grey.shade500, size: 18),
               ],
             ),
           ),
@@ -275,27 +231,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ===================== UI =====================
+  // MAIN UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
+      backgroundColor: const Color(0xFFE9F2FF),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           "Profil",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // ===================== AVATAR =====================
+                  const SizedBox(height: 10),
+
+                  // AVATAR
                   CircleAvatar(
                     radius: 52,
                     backgroundColor: Colors.blue.shade100,
@@ -313,75 +273,86 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           )
                         : null,
                   ),
+
                   const SizedBox(height: 12),
 
                   Text(
                     user?.name ?? "-",
                     style: const TextStyle(
                       fontSize: 21,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 4),
                   Text(
                     user?.email ?? "-",
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    style: TextStyle(color: Colors.grey.shade700),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 30),
 
+                  // INFO
                   _infoTile("Batch Ke", user?.batchKe ?? "-"),
                   _infoTile("Pelatihan", user?.trainingTitle ?? "-"),
                   _infoTile("Jenis Kelamin", user?.jenisKelamin ?? "-"),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 28),
 
-                  // ===================== MENU LIST =====================
+                  // MENU
                   _menuItem(
                     icon: Icons.edit,
-                    iconBg: Colors.blue.shade50,
-                    iconColor: Colors.blue.shade700,
                     label: "Edit Profil",
+                    bg: Colors.blue.shade50,
+                    color: Colors.blue.shade700,
                     onTap: _showEditDialog,
                   ),
-
                   _menuItem(
-                    icon: Icons.logout_rounded,
-                    iconBg: Colors.grey.shade200,
-                    iconColor: Colors.grey.shade800,
+                    icon: Icons.logout,
                     label: "Logout",
+                    bg: Colors.red.shade50,
+                    color: Colors.red.shade700,
                     onTap: () async {
                       final confirm = await _showConfirmDialog(
                         title: "Logout",
-                        message:
-                            "Anda akan keluar dari akun. Yakin ingin logout?",
-                        okText: "Logout",
+                        message: "Yakin ingin keluar?",
                       );
-                      if (confirm == true) {
-                        await _logout();
-                      }
+                      if (confirm == true) _logout();
                     },
                   ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 6),
+                    child: Text(
+                      "Created by Zahra Khotimah",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 0.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
     );
   }
 
-  // ===================== TILE =====================
+  // TILE INFO
   Widget _infoTile(String label, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black12.withOpacity(0.05),
-            blurRadius: 10,
+            blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
@@ -389,75 +360,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         children: [
           Expanded(
-            flex: 3,
             child: Text(
               label,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
             ),
           ),
-
-          // nilai di sebelah kanan
-          Expanded(
-            flex: 4,
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis, // <<< FIX UTAMA
-              softWrap: false,
-            ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
         ],
       ),
     );
   }
 
+  // MENU ITEM
   Widget _menuItem({
     required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
     required String label,
+    required Color bg,
+    required Color color,
     required VoidCallback onTap,
   }) {
     return InkWell(
-      onTap: onTap,
       borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black12.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
+            BoxShadow(color: Colors.black12.withOpacity(0.05), blurRadius: 8),
           ],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-              child: Icon(icon, color: iconColor, size: 20),
+              decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+              child: Icon(icon, color: color),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 label,
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
                 ),
               ),
             ),

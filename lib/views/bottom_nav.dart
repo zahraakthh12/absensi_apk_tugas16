@@ -15,7 +15,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> pages = [
     const DashboardScreen(),
-    const AttendancePage(), // Kehadiran
+    const AttendancePage(),
     ProfileScreen(),
   ];
 
@@ -24,7 +24,7 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       body: pages[currentIndex],
 
-      // FAB KEHADIRAN DI TENGAH
+      // KEHADIRAN DI TENGAH
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: GestureDetector(
         onTap: () => setState(() => currentIndex = 1),
@@ -50,9 +50,8 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       ),
 
-      // CUSTOM BOTTOM BAR
       bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFFF7F5FF),
+        color: Colors.white,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         elevation: 10,
@@ -65,18 +64,16 @@ class _MainNavigationState extends State<MainNavigation> {
                 child: _navItem(
                   index: 0,
                   icon: Icons.dashboard_outlined,
-                  label: "Home",
+                  label: "Beranda",
                 ),
               ),
 
-              // LABEL KEHADIRAN DI TENGAH (di bawah FAB)
+              // LABEL KEHADIRAN DI TENGAH
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const SizedBox(
-                      height: 12,
-                    ), // sedikit turun biar tidak ketutup FAB
+                    const SizedBox(height: 12),
                     Text(
                       "Kehadiran",
                       style: TextStyle(
@@ -94,7 +91,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 ),
               ),
 
-              // PROFIL (kanan)
+              // PROFIL
               Expanded(
                 child: _navItem(
                   index: 2,
@@ -109,7 +106,7 @@ class _MainNavigationState extends State<MainNavigation> {
     );
   }
 
-  // ============== WIDGET ITEM NAV (HOME & PROFIL) ==============
+  // WIDGET ITEM NAV (HOME & PROFIL)
   Widget _navItem({
     required int index,
     required IconData icon,
